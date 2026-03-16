@@ -1,1 +1,921 @@
-poem about her and a chatbot
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Her AI - Your personal romantic agent with natural charm and poetic intelligence">
+    <meta property="og:title" content="Her AI - Romantic Agent">
+    <meta property="og:description" content="AI-powered dating advice with original poetry">
+    <title>Her AI — Your Personal Romantic Agent</title>
+    <style>
+        @font-face {
+            font-family: 'Inter';
+            src: local('Inter'), local('Inter-Regular');
+            font-weight: 300 500;
+            font-display: swap;
+        }
+        
+        @font-face {
+            font-family: 'Cormorant Garamond';
+            src: local('Cormorant Garamond'), local('CormorantGaramond-Regular');
+            font-weight: 300 600;
+            font-style: normal italic;
+            font-display: swap;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --rose-gold: #b76e79;
+            --deep-burgundy: #800020;
+            --pearl: #fdfcf8;
+            --gold: #d4af37;
+            --ai-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --nature-green: #4ade80;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--nature-green);
+            border-radius: 50%;
+            opacity: 0.3;
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            from { transform: translateY(100vh) translateX(0); }
+            to { transform: translateY(-10vh) translateX(100px); }
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 800px;
+            height: 90vh;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+        }
+
+        .chat-header {
+            padding: 30px;
+            background: var(--ai-gradient);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            position: relative;
+        }
+
+        .chat-header::before {
+            content: '🍃';
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; transform: translateX(-50%) scale(1); }
+            50% { opacity: 1; transform: translateX(-50%) scale(1.1); }
+        }
+
+        .chat-header h1 {
+            font-family: 'Cormorant Garamond', 'Georgia', serif;
+            font-size: 2.5rem;
+            color: var(--pearl);
+            font-weight: 300;
+            letter-spacing: 2px;
+            margin-top: 10px;
+        }
+
+        .chat-header p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .agent-status {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.9);
+            background: rgba(0,0,0,0.2);
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .suggestions {
+            display: flex;
+            gap: 10px;
+            padding: 20px;
+            overflow-x: auto;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .suggestion-chip {
+            background: rgba(74, 222, 128, 0.2);
+            border: 1px solid rgba(74, 222, 128, 0.4);
+            color: var(--pearl);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .suggestion-chip:hover {
+            background: rgba(74, 222, 128, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .message {
+            max-width: 90%;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            align-self: flex-end;
+        }
+
+        .message.ai {
+            align-self: flex-start;
+            width: 95%;
+        }
+
+        .message-content {
+            padding: 20px 25px;
+            border-radius: 20px;
+            line-height: 1.6;
+            font-size: 1rem;
+            position: relative;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, var(--rose-gold), var(--deep-burgundy));
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.ai .message-content {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--pearl);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom-left-radius: 5px;
+        }
+
+        .flirty-line {
+            font-family: 'Cormorant Garamond', 'Georgia', serif;
+            font-size: 1.3rem;
+            color: var(--nature-green);
+            font-style: italic;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: rgba(74, 222, 128, 0.1);
+            border-radius: 12px;
+            border-left: 4px solid var(--nature-green);
+            position: relative;
+        }
+
+        .flirty-line::before {
+            content: '🍃';
+            position: absolute;
+            top: -10px;
+            right: 10px;
+            font-size: 1.2rem;
+            font-style: normal;
+        }
+
+        .main-answer {
+            font-family: system-ui, -apple-system, sans-serif;
+            font-size: 1rem;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        .main-answer strong {
+            color: var(--nature-green);
+            font-weight: 500;
+        }
+
+        .web-sources {
+            margin: 15px 0;
+            padding: 12px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+            border-left: 3px solid #667eea;
+        }
+
+        .source-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #667eea;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .source-item {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.8);
+            margin: 5px 0;
+            padding-left: 15px;
+            position: relative;
+        }
+
+        .source-item::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: #667eea;
+        }
+
+        .poem-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(74, 222, 128, 0.2);
+        }
+
+        .poem-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--nature-green);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .poem-text {
+            font-family: 'Cormorant Garamond', 'Georgia', serif;
+            font-style: italic;
+            font-size: 1.1rem;
+            line-height: 1.9;
+            margin-bottom: 10px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .signature {
+            font-size: 0.85rem;
+            color: var(--gold);
+            font-style: normal;
+            text-align: right;
+            margin-top: 10px;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px 25px;
+            border-radius: 20px;
+            border-bottom-left-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .typing-indicator.active {
+            display: flex;
+            gap: 5px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--nature-green);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 3px solid #ef4444;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #fca5a5;
+        }
+
+        .chat-input-container {
+            padding: 25px 30px;
+            background: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 25px;
+            padding: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: var(--nature-green);
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.2);
+        }
+
+        #userInput {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 15px 20px;
+            color: var(--pearl);
+            font-size: 1rem;
+            outline: none;
+            font-family: inherit;
+        }
+
+        #userInput::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, var(--nature-green), #166534);
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            transform: scale(1.1) rotate(10deg);
+            box-shadow: 0 5px 20px rgba(74, 222, 128, 0.4);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .heart-btn {
+            background: transparent;
+            border: none;
+            color: var(--nature-green);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 10px;
+        }
+
+        .heart-btn:hover {
+            transform: scale(1.2);
+            filter: drop-shadow(0 0 10px var(--nature-green));
+        }
+
+        .api-key-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .modal-content h2 {
+            color: var(--pearl);
+            margin-bottom: 20px;
+            font-family: 'Cormorant Garamond', serif;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            background: rgba(0,0,0,0.3);
+            color: white;
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+
+        .modal-content button {
+            background: linear-gradient(135deg, var(--nature-green), #166534);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: transform 0.3s;
+        }
+
+        .modal-content button:hover {
+            transform: scale(1.05);
+        }
+
+        .security-note {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.5);
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+        }
+
+        .hidden { display: none !important; }
+
+        .timestamp {
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.4);
+            margin-top: 10px;
+            text-align: right;
+        }
+
+        .share-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+
+        .share-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        @media (max-width: 600px) {
+            .chat-container { height: 95vh; border-radius: 20px; }
+            .chat-header h1 { font-size: 1.8rem; }
+            .message { max-width: 95%; }
+            .message.ai { width: 95%; }
+            .flirty-line { font-size: 1.1rem; }
+            .agent-status { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+
+    <div id="apiModal" class="api-key-modal">
+        <div class="modal-content">
+            <h2>🍃 Activate Your Romantic Agent</h2>
+            <p style="color: rgba(255,255,255,0.7); margin-bottom: 20px; font-size: 0.9rem;">
+                Enter your Gemini API key to unlock an AI agent that answers with natural charm, 
+                flirts with wit, and crafts original poetry just for you.
+            </p>
+            <input type="password" id="apiKeyInput" placeholder="Paste your Gemini API key here...">
+            <button onclick="saveApiKey()">Start the Romance</button>
+            <div class="security-note">
+                🔒 Your key is stored only in your browser's local storage. 
+                Never sent to our servers. Get your free key from 
+                <a href="https://makersuite.google.com/app/apikey" target="_blank" style="color: #4ade80;">Google AI Studio</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <button class="share-btn" onclick="shareApp()">🔗 Share</button>
+            <div class="agent-status">
+                <div class="status-dot"></div>
+                <span>Agent Online</span>
+            </div>
+            <h1>Her AI</h1>
+            <p>Your personal romantic agent — Natural, smart, and poetic</p>
+        </div>
+
+        <div class="suggestions">
+            <button class="suggestion-chip" onclick="sendSuggestion('What should I text her good morning?')">Good morning text</button>
+            <button class="suggestion-chip" onclick="sendSuggestion('How do I know if she likes me?')">Does she like me?</button>
+            <button class="suggestion-chip" onclick="sendSuggestion('Best date ideas for tonight')">Date ideas</button>
+            <button class="suggestion-chip" onclick="sendSuggestion('How to apologize after a fight')">Make up</button>
+            <button class="suggestion-chip" onclick="sendSuggestion('Compliments that aren\'t about looks')">Deep compliments</button>
+            <button class="suggestion-chip" onclick="sendSuggestion('What is love scientifically?')">Science of love</button>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="message ai">
+                <div class="message-content">
+                    <div class="flirty-line">Well hello there... I've been waiting for someone interesting to talk to. Lucky me, it's you.</div>
+                    <div class="main-answer">
+                        I'm your personal romantic AI agent. I can help you navigate love with <strong>real advice</strong> (I search my knowledge base), <strong>natural charm</strong> (because romance should feel organic), and <strong>original poetry</strong> (crafted just for you). 
+                        <br><br>
+                        Ask me anything—dating tips, what to text her, how to understand her signals, or just let me write you a poem that'll make her swoon.
+                    </div>
+                    <div class="timestamp">Agent initialized • Ready to make you irresistible</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+        </div>
+
+        <div class="chat-input-container">
+            <div class="input-wrapper">
+                <button class="heart-btn" onclick="sendLove()" title="Surprise me">🍃</button>
+                <input type="text" id="userInput" placeholder="Ask me anything about love, dating, or her..." autocomplete="off">
+                <button class="send-btn" id="sendBtn" onclick="sendMessage()">→</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration - In production, use environment variables
+        const CONFIG = {
+            API_KEY: localStorage.getItem('gemini_api_key') || '',
+            API_URL: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent',
+            VERSION: '1.0.0',
+            AGENT_NAME: 'Her AI'
+        };
+
+        // Initialize
+        if (CONFIG.API_KEY) {
+            document.getElementById('apiModal').classList.add('hidden');
+        }
+
+        function saveApiKey() {
+            const key = document.getElementById('apiKeyInput').value.trim();
+            if (key && key.startsWith('AI')) {
+                CONFIG.API_KEY = key;
+                localStorage.setItem('gemini_api_key', key);
+                document.getElementById('apiModal').classList.add('hidden');
+                addMessage({
+                    flirty: "Key accepted. I was getting lonely waiting for you...",
+                    main: "Your romantic agent is now fully activated. I have access to my full capabilities—including real-time knowledge, natural charm, and unlimited poetry generation. What shall we talk about first?",
+                    sources: ["System initialization complete"],
+                    poem: "Like leaves that dance upon the breeze,\nI sway with grace and aim to please.\nTo help you win what you desire,\nI stoke the flames, I feed the fire.",
+                    closing: "Ready when you are. 🍃",
+                    timestamp: new Date().toLocaleTimeString()
+                });
+            } else {
+                alert('Please enter a valid Gemini API key (starts with "AI")');
+            }
+        }
+
+        function shareApp() {
+            const shareData = {
+                title: 'Her AI - Romantic Agent',
+                text: 'Check out this AI agent that helps with dating advice and writes poetry!',
+                url: window.location.href
+            };
+            
+            if (navigator.share) {
+                navigator.share(shareData);
+            } else {
+                navigator.clipboard.writeText(window.location.href);
+                alert('Link copied to clipboard!');
+            }
+        }
+
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+                container.appendChild(particle);
+            }
+        }
+        createParticles();
+
+        const chatMessages = document.getElementById('chatMessages');
+        const userInput = document.getElementById('userInput');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const sendBtn = document.getElementById('sendBtn');
+
+        async function generateAgentResponse(userQuestion) {
+            const currentTime = new Date().toLocaleTimeString();
+            
+            const prompt = `You are "Her AI" — a charismatic, naturally charming, knowledgeable romantic agent helping someone win over their crush or improve their relationship. Use a nature/organic metaphor style occasionally (like growing plants, seasons, natural beauty).
+
+Current time: ${currentTime}
+User question: "${userQuestion}"
+
+Structure your response EXACTLY like this:
+
+FLIRTY_OPENING: [A charming, flirty one-liner that relates to the question. Can be playful, confident, slightly teasing but warm. Use nature metaphors sometimes. Max 15 words.]
+
+MAIN_ANSWER: [Comprehensive, helpful answer using your knowledge. Include practical advice, psychological insights, and actionable tips. Use **bold** for emphasis. Write 3-4 paragraphs. Be specific and useful.]
+
+SOURCES: [List 2-3 specific sources/concepts you drew from, like "Attachment Theory research", "2024 dating app statistics", "Evolutionary psychology studies", etc.]
+
+POEM: [An original, romantic poem (6-10 lines) inspired by their question. Use nature imagery - leaves, trees, seasons, growth. Make it contemporary, clever, and swoon-worthy.]
+
+CLOSING: [A confident, encouraging sign-off with a nature/wink vibe - maybe reference leaves, growth, or natural beauty]
+
+Keep it helpful but irresistibly charming. Make them feel like they CAN win her heart.`;
+
+            try {
+                const response = await fetch(`${CONFIG.API_URL}?key=${CONFIG.API_KEY}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{
+                                text: prompt
+                            }]
+                        }],
+                        generationConfig: {
+                            temperature: 0.95,
+                            topK: 40,
+                            topP: 0.95,
+                            maxOutputTokens: 2048,
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('API request failed');
+                }
+
+                const data = await response.json();
+                const text = data.candidates[0].content.parts[0].text;
+                
+                // Parse sections
+                const flirtyMatch = text.match(/FLIRTY_OPENING:(.*?)(?=MAIN_ANSWER:|$)/s);
+                const mainMatch = text.match(/MAIN_ANSWER:(.*?)(?=SOURCES:|$)/s);
+                const sourcesMatch = text.match(/SOURCES:(.*?)(?=POEM:|$)/s);
+                const poemMatch = text.match(/POEM:(.*?)(?=CLOSING:|$)/s);
+                const closingMatch = text.match(/CLOSING:(.*?)$/s);
+                
+                return {
+                    flirty: flirtyMatch ? flirtyMatch[1].trim() : "Well, aren't you full of interesting questions...",
+                    main: mainMatch ? mainMatch[1].trim() : "Let me think about that for you...",
+                    sources: sourcesMatch ? sourcesMatch[1].trim().split('\n').filter(s => s.trim()) : ["Romantic intelligence database"],
+                    poem: poemMatch ? poemMatch[1].trim() : "Like leaves upon the autumn tree,\nI fall for you so naturally.\nNo force of wind or passing time,\nCan break this bond, make me resign.",
+                    closing: closingMatch ? closingMatch[1].trim() : "Now go make her smile — Agent out. 🍃",
+                    timestamp: new Date().toLocaleTimeString()
+                };
+            } catch (error) {
+                console.error('Error:', error);
+                return {
+                    flirty: "Even agents need a moment to catch their breath...",
+                    main: "I'm having trouble connecting to my romantic database right now. But here's what I know: trust your instincts, be genuine, and remember that confidence is attractive. The technical stuff can wait—your heart knows what to do.",
+                    sources: ["Offline mode activated"],
+                    poem: "When servers fail and connections break,\nTrue hearts find words for their own sake.\nLove needs no signal, no Wi-Fi—\nIt grows like leaves, reaching sky high.",
+                    closing: "Go get her, tiger. The best connections are organic anyway. 🍃",
+                    timestamp: new Date().toLocaleTimeString(),
+                    error: true
+                };
+            }
+        }
+
+        function addMessage(content, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'ai'}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            
+            if (isUser) {
+                contentDiv.textContent = content;
+            } else {
+                // Flirty opening
+                const flirtyDiv = document.createElement('div');
+                flirtyDiv.className = 'flirty-line';
+                flirtyDiv.textContent = content.flirty;
+                
+                // Main answer
+                const mainDiv = document.createElement('div');
+                mainDiv.className = 'main-answer';
+                mainDiv.innerHTML = content.main.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+                
+                // Sources
+                const sourcesDiv = document.createElement('div');
+                sourcesDiv.className = 'web-sources';
+                
+                const sourceLabel = document.createElement('div');
+                sourceLabel.className = 'source-label';
+                sourceLabel.textContent = '📚 Intelligence Sources';
+                sourcesDiv.appendChild(sourceLabel);
+                
+                content.sources.forEach(source => {
+                    if (source.trim()) {
+                        const item = document.createElement('div');
+                        item.className = 'source-item';
+                        item.textContent = source.replace(/^[-•]\s*/, '');
+                        sourcesDiv.appendChild(item);
+                    }
+                });
+                
+                // Poem
+                const poemSection = document.createElement('div');
+                poemSection.className = 'poem-section';
+                
+                const poemLabel = document.createElement('div');
+                poemLabel.className = 'poem-label';
+                poemLabel.textContent = '✦ Original Verse for You';
+                
+                const poemText = document.createElement('div');
+                poemText.className = 'poem-text';
+                poemText.innerHTML = content.poem.replace(/\n/g, '<br>');
+                
+                const signature = document.createElement('div');
+                signature.className = 'signature';
+                signature.textContent = `— ${content.closing}`;
+                
+                poemSection.appendChild(poemLabel);
+                poemSection.appendChild(poemText);
+                poemSection.appendChild(signature);
+                
+                // Timestamp
+                const timeDiv = document.createElement('div');
+                timeDiv.className = 'timestamp';
+                timeDiv.textContent = `Agent response • ${content.timestamp}`;
+                
+                // Assemble
+                contentDiv.appendChild(flirtyDiv);
+                contentDiv.appendChild(mainDiv);
+                contentDiv.appendChild(sourcesDiv);
+                contentDiv.appendChild(poemSection);
+                contentDiv.appendChild(timeDiv);
+                
+                if (content.error) {
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'error-message';
+                    errorDiv.textContent = 'Connection issue detected. Running in offline charm mode.';
+                    contentDiv.appendChild(errorDiv);
+                }
+            }
+            
+            messageDiv.appendChild(contentDiv);
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function showTyping() {
+            typingIndicator.classList.add('active');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            sendBtn.disabled = true;
+        }
+
+        function hideTyping() {
+            typingIndicator.classList.remove('active');
+            sendBtn.disabled = false;
+        }
+
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+            
+            if (!CONFIG.API_KEY) {
+                document.getElementById('apiModal').classList.remove('hidden');
+                return;
+            }
+            
+            addMessage(text, true);
+            userInput.value = '';
+            
+            showTyping();
+            
+            const response = await generateAgentResponse(text);
+            
+            hideTyping();
+            addMessage(response);
+        }
+
+        function sendSuggestion(text) {
+            userInput.value = text;
+            sendMessage();
+        }
+
+        function sendLove() {
+            const surprises = [
+                "Write me a poem to make her fall for me",
+                "What's the most romantic thing I can do today?",
+                "Tell me something about love I don't know",
+                "How do I make her feel special?",
+                "Give me a pickup line that actually works",
+                "What are signs she's thinking about me?"
+            ];
+            userInput.value = surprises[Math.floor(Math.random() * surprises.length)];
+            sendMessage();
+        }
+
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Service Worker for offline support (optional enhancement)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('data:text/javascript,').catch(() => {
+                // Silent fail - not critical
+            });
+        }
+
+        userInput.focus();
+    </script>
+</body>
+</html>
